@@ -64,7 +64,10 @@ jobs:
             echo "Building and pushing $IMAGE_NAME1:$DATE_TAG and $IMAGE_NAME1:latest..."
             #echo "Building and pushing $IMAGE_NAME2:$DATE_TAG and $IMAGE_NAME2:latest..."
 
-            docker build -t $IMAGE_NAME1:$DATE_TAG $service
+            docker buildx build \
+              --platform linux/amd64,linux/arm64 \
+              -t $IMAGE_NAME1:$DATE_TAG $service
+              
             docker tag $IMAGE_NAME1:$DATE_TAG $IMAGE_NAME2:latest
 
             docker push $IMAGE_NAME1:$DATE_TAG
