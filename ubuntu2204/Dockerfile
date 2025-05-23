@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ARG NODE_VERSION=20.11.1
-ARG TARGETARCH
+ARG TARGETARCH  # amd64 and  arm64
 
 # 安装必要软件
 RUN apt-get update && \
