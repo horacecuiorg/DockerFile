@@ -28,6 +28,6 @@ CMD ["/bin/bash"]
 
 
 # 构建镜像
-# docker build -t ubuntu22.04-sjtu .
+# docker build -t ubuntu22.04 .
 # 运行容器
-# docker run -it --rm ubuntu22.04-sjtu
+# docker run -it --rm ubuntu22.04
