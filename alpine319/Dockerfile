@@ -30,11 +30,14 @@ RUN case "$TARGETARCH" in \
     chmod +x /usr/local/bin/cloudflared && \
     cloudflared --version
 
-RUN case "$TARGETARCH" in \
+RUN apk add --no-cache curl xz tar && \
+    ARCH_NAME="" && \
+    case "$TARGETARCH" in \
       amd64) ARCH_NAME="x64" ;; \
       arm64) ARCH_NAME="arm64" ;; \
       *) echo "Unsupported arch: $TARGETARCH" && exit 1 ;; \
     esac && \
+    echo "Downloading Node.js for arch: $ARCH_NAME" && \
     curl -fsSL -o /tmp/node.tar.xz https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH_NAME}.tar.xz && \
     xz -d /tmp/node.tar.xz && \
     tar -xf /tmp/node.tar -C /usr/local --strip-components=1 && \
@@ -42,7 +45,7 @@ RUN case "$TARGETARCH" in \
     node -v && npm -v
 
 # 创建 alpine 用户并赋予 sudo 权限
-RUN useradd -m -s /bin/bash alpine && \
+RUN useradd -m -s /bin/sh alpine && \
     echo "alpine:alpine" | chpasswd && \
     adduser alpine wheel && \
     echo '%wheel ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/wheel && \
@@ -54,4 +57,4 @@ WORKDIR /home/alpine
 # 设置默认用户
 USER alpine
 
-CMD ["/bin/bash"]
+CMD ["/bin/sh"]
