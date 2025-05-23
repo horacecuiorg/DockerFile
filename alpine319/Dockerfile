@@ -1,6 +1,7 @@
 FROM alpine:3.19
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH=/usr/local/bin:$PATH
 ARG NODE_VERSION=20.11.1
 ARG TARGETARCH  # amd64 or arm64
 
@@ -31,7 +32,6 @@ RUN case "$TARGETARCH" in \
     cloudflared --version
 
 RUN apk add --no-cache curl xz tar && \
-    ARCH_NAME="" && \
     case "$TARGETARCH" in \
       amd64) ARCH_NAME="x64" ;; \
       arm64) ARCH_NAME="arm64" ;; \
