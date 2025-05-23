@@ -30,14 +30,15 @@ RUN case "$TARGETARCH" in \
     chmod +x /usr/local/bin/cloudflared && \
     cloudflared --version
 
-# Node.js 安装（官方 tarball）
 RUN case "$TARGETARCH" in \
       amd64) ARCH_NAME="x64" ;; \
       arm64) ARCH_NAME="arm64" ;; \
       *) echo "Unsupported arch: $TARGETARCH" && exit 1 ;; \
     esac && \
-    curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH_NAME}.tar.xz \
-    | tar -xJ -C /usr/local --strip-components=1 && \
+    curl -fsSL -o /tmp/node.tar.xz https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH_NAME}.tar.xz && \
+    xz -d /tmp/node.tar.xz && \
+    tar -xf /tmp/node.tar -C /usr/local --strip-components=1 && \
+    rm /tmp/node.tar && \
     node -v && npm -v
 
 # 创建 alpine 用户并赋予 sudo 权限
