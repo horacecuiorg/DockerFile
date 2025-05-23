@@ -20,7 +20,7 @@ RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ubuntu && \
 
 # 设置工作目录为用户主目录
 WORKDIR /home/ubuntu
-    
+
 # 设置 ubuntu 用户为默认用户
 USER ubuntu
 # 默认进入 shell
@@ -28,5 +28,7 @@ CMD ["/bin/bash"]
 
 # 构建镜像
 # docker build -t ubuntu22.04 .
+# 构建多平台镜像
+# docker buildx build --platform linux/amd64,linux/arm64 -t ubuntu22.04 .
 # 运行容器
 # docker run -it --rm ubuntu22.04

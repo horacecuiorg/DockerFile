@@ -67,8 +67,8 @@ jobs:
             docker buildx build \
               --platform linux/amd64,linux/arm64 \
               -t $IMAGE_NAME1:$DATE_TAG $service
-              
-            docker tag $IMAGE_NAME1:$DATE_TAG $IMAGE_NAME2:latest
+
+            docker tag $IMAGE_NAME1:$DATE_TAG $IMAGE_NAME1:latest
 
             docker push $IMAGE_NAME1:$DATE_TAG
             docker push $IMAGE_NAME1:latest
