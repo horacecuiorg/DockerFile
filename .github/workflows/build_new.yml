@@ -18,13 +18,7 @@ jobs:
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Aliyun ACR
-        if: false
-        run: |
-          echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login ${{ vars.ALIYUN_REGISTRY }} \
-            --username ${{ secrets.ALIYUN_USERNAME }} --password-stdin
-
+        
       - name: Log in to Docker hub
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login \
@@ -59,26 +53,15 @@ jobs:
           for service in ${{ steps.changes.outputs.services }}; do
             DATE_TAG=${{ steps.date.outputs.tag }}            
             IMAGE_NAME1=${{ secrets.DOCKER_NAMESPACE }}/$service
-            # IMAGE_NAME2=registry.cn-shanghai.aliyuncs.com/${{ secrets.DOCKER_NAMESPACE }}/$service
 
             echo "Building and pushing $IMAGE_NAME1:$DATE_TAG and $IMAGE_NAME1:latest..."
-            #echo "Building and pushing $IMAGE_NAME2:$DATE_TAG and $IMAGE_NAME2:latest..."
 
             docker buildx build \
               --platform linux/amd64,linux/arm64 \
               --build-arg NODE_VERSION=20.11.1 \
               --push \
-              -t $IMAGE_NAME1:$DATE_TAG $service
-
-            docker tag $IMAGE_NAME1:$DATE_TAG $IMAGE_NAME1:latest
-
-            docker push $IMAGE_NAME1:$DATE_TAG
-            docker push $IMAGE_NAME1:latest
-
-            #docker tag $IMAGE_NAME1:$DATE_TAG $IMAGE_NAME2:$DATE_TAG
-            #docker tag $IMAGE_NAME1:$DATE_TAG $IMAGE_NAME2:latest
-            #docker push $IMAGE_NAME2:$DATE_TAG
-            #docker push $IMAGE_NAME2:latest
+              -t $IMAGE_NAME1:$DATE_TAG  -t $IMAGE_NAME1:latest \
+              $service
           done
 
               

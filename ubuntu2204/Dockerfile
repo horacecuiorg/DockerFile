@@ -20,7 +20,18 @@ RUN apt-get update && \
     bash && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+# cloudflared
+RUN case "$TARGETARCH" in \
+      amd64) ARCH="amd64" ;; \
+      arm64) ARCH="arm64" ;; \
+      *) echo "Unsupported architecture: $TARGETARCH" && exit 1 ;; \
+    esac && \
+    curl -fsSL -o /usr/local/bin/cloudflared \
+      "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${ARCH}" && \
+    chmod +x /usr/local/bin/cloudflared && \
+    cloudflared --version
 
+# node    
 RUN ARCH=$TARGETARCH && \
     case "$ARCH" in \
       amd64) ARCH_NAME="x64" ;; \
