@@ -2,6 +2,7 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ARG NODE_VERSION=20.11.1
+ARG TARGETARCH
 
 # 安装必要软件
 RUN apt-get update && \
@@ -20,8 +21,13 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# 安装 Node.js（官方 Linux 二进制）
-RUN curl -fsSL https://unofficial-builds.nodejs.org/download/release/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz \
+RUN ARCH=$TARGETARCH && \
+    case "$ARCH" in \
+      amd64) ARCH_NAME="x64" ;; \
+      arm64) ARCH_NAME="arm64" ;; \
+      *) echo "Unsupported arch: $ARCH" && exit 1 ;; \
+    esac && \
+    curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH_NAME}.tar.xz \
     | tar -xJ -C /usr/local --strip-components=1 && \
     node -v && npm -v
 
