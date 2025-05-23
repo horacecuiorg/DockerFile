@@ -26,7 +26,6 @@ USER ubuntu
 # 默认进入 shell
 CMD ["/bin/bash"]
 
-
 # 构建镜像
 # docker build -t ubuntu22.04 .
 # 运行容器
