@@ -28,7 +28,9 @@ CMD ["/bin/bash"]
 
 # 构建镜像
 # docker build -t ubuntu22.04 .
-# 构建多平台镜像
-# docker buildx build --platform linux/amd64,linux/arm64 -t ubuntu22.04 .
+# 构建多平台镜像load
+# docker buildx build --platform linux/amd64,linux/arm64 --load -t ubuntu22.04 .
+# 构建多平台镜像push
+# docker buildx build --platform linux/amd64,linux/arm64 --push -t ubuntu22.04 .
 # 运行容器
 # docker run -it --rm ubuntu22.04
