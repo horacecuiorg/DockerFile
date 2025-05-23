@@ -1,12 +1,32 @@
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
+ARG NODE_VERSION=20.11.1
 
-# 安装 ca-certificates，并更新源为上海交大
-RUN apt-get update &&  \
-    apt-get install -y ca-certificates openssh-client sudo curl wget vim iputils-ping nano && \
-    apt-get update && \
-    apt-get upgrade -y
+# 安装必要软件
+RUN apt-get update && \
+    apt-get install -y \
+    ca-certificates \
+    curl \
+    wget \
+    vim \
+    nano \
+    git \
+    openssh-client \
+    sudo \
+    iputils-ping \
+    xz-utils \
+    bash && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# 安装 Node.js（官方 Linux 二进制）
+RUN curl -fsSL https://unofficial-builds.nodejs.org/download/release/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz \
+    | tar -xJ -C /usr/local --strip-components=1 && \
+    node -v && npm -v
+
+# 更新
+RUN apt-get update && apt-get upgrade -y 
 
 
 # 创建一个新用户 ubuntu，并赋予 sudo 权限
