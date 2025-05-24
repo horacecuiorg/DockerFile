@@ -2,7 +2,7 @@ FROM alpine:3.19
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH=/usr/local/bin:$PATH
-ARG NODE_VERSION=20.11.1
+ARG NODE_VERSION=23.11.1
 ARG TARGETARCH  # amd64 or arm64
 
 # 安装必要软件
