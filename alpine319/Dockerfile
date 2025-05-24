@@ -39,6 +39,7 @@ RUN case "$TARGETARCH" in \
       *) echo "Unsupported arch: $TARGETARCH" && exit 1 ;; \
     esac && \
     echo "Downloading Node.js for arch: $ARCH_NAME"
+RUN echo https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH_NAME}.tar.xz
 RUN curl -fsSL -o /tmp/node.tar.xz https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH_NAME}.tar.xz
 RUN xz -d /tmp/node.tar.xz
 RUN tar -xf /tmp/node.tar -C /usr/local --strip-components=1
