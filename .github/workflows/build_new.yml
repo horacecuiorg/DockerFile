@@ -57,7 +57,7 @@ jobs:
 
           echo "services=$SERVICES" >> "$GITHUB_OUTPUT"
 
-      - name: Build Docker images (without pushing)
+      - name: Build Docker images (with pushing)
         if: steps.changes.outputs.services != ''
         id: build_and_push
         run: |

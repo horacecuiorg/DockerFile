@@ -1,1 +1,1 @@
-FROM hello-world 
+FROM ubuntu22.04
