@@ -6,7 +6,7 @@ on:
       namespace:
         description: 'Docker Hub 用户名或组织名 (Namespace)'
         required: true
-        default: 'library' # 默认使用官方库 (e.g., library/ubuntu)
+        default: 'library'
       use_auth:
         description: '是否使用 Docker Hub 凭据登录 (用于私有仓库或避免速率限制)?'
         type: boolean
@@ -17,7 +17,12 @@ jobs:
   list_images:
     runs-on: ubuntu-latest
     permissions:
-      contents: read # 只需要读取仓库内容，不是必须的，但建议保留
+      contents: write # 需要写入权限才能创建 docker_hub_results.json 文件
+      packages: write # 如果你想将结果上传到 GitHub Packages (可选)
+
+    outputs:
+      results_json_path: ${{ steps.run_script.outputs.docker_hub_results_path }}
+      results_json_string: ${{ steps.run_script.outputs.docker_hub_results_json_string }}
 
     steps:
       - name: Checkout repository
@@ -32,11 +37,30 @@ jobs:
         run: pip install requests
 
       - name: Run Docker Hub Image Lister Script
+        id: run_script # 添加 ID 以便引用其输出
         env:
           TARGET_NAMESPACE: ${{ inputs.namespace }}
           USE_DOCKER_HUB_AUTH: ${{ inputs.use_auth }}
-          # 仅当 use_auth 为 true 时，才将敏感信息传递给脚本
           DOCKER_HUB_USERNAME: ${{ inputs.use_auth == true && secrets.DOCKER_HUB_USERNAME || '' }}
           DOCKER_HUB_PASSWORD: ${{ inputs.use_auth == true && secrets.DOCKER_HUB_PASSWORD || '' }}
         run: |
           python public_scripts/list_dockerhub_images.py
+
+      - name: Verify and use JSON output (Example)
+        run: |
+          echo "JSON file path: ${{ steps.run_script.outputs.docker_hub_results_path }}"
+          echo "JSON string (if small enough): ${{ steps.run_script.outputs.docker_hub_results_json_string }}"
+          
+          # 从文件中读取JSON数据
+          if [ -f "${{ steps.run_script.outputs.docker_hub_results_path }}" ]; then
+            echo "--- Content of docker_hub_results.json ---"
+            cat "${{ steps.run_script.outputs.docker_hub_results_path }}"
+            echo "------------------------------------------"
+          else
+            echo "JSON results file not found."
+          fi
+
+          # 你可以在这里添加逻辑来将这些JSON数据发送到外部API
+          # curl -X POST -H "Content-Type: application/json" \
+          #      -d "$(cat ${{ steps.run_script.outputs.docker_hub_results_path }})" \
+          #      "YOUR_WEBHOOK_URL"
