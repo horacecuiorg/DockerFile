@@ -1,5 +1,5 @@
 FROM ubuntu:22.04
-
+LABEL org.opencontainers.image.source https://github.com/horacecuiorg/dockerfile
 
 # 安装必要软件
 RUN apt-get update && \

@@ -1,0 +1,59 @@
+name: Manual Build and Push
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service directory to build (e.g., service1)'
+        required: true
+        type: string
+
+env:
+  DOCKER_NAMESPACE: ${{ secrets.DOCKER_NAMESPACE }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  GHCR_NAMESPACE: ${{ secrets.GHCR_NAMESPACE }}
+  GHCR_PAT: ${{ secrets.GHCR_PAT }}
+  GHCR_ORG_NAMESPACE: ${{ secrets.GHCR_ORG_NAMESPACE }}
+
+jobs:
+  manual-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ env.DOCKER_NAMESPACE }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ env.GHCR_NAMESPACE }}
+          password: ${{ env.GHCR_PAT }}
+
+      - name: Run build script for one service
+        run: |
+          rm -f images.txt
+          bash public_scripts/build_one.sh "${{ inputs.service }}"
+        env:
+          DOCKER_NAMESPACE: ${{ env.DOCKER_NAMESPACE }}
+          GHCR_ORG_NAMESPACE: ${{ env.GHCR_ORG_NAMESPACE }}
+
+      - name: Show pushed images
+        run: |
+          echo "--- 推送镜像列表 ---"
+          cat images.txt || echo "无镜像推送"
+          echo "--------------------"

@@ -1,5 +1,7 @@
 FROM ubuntu:22.04
 
+LABEL org.opencontainers.image.source https://github.com/horacecuiorg/dockerfile
+
 ENV DEBIAN_FRONTEND=noninteractive
 ARG NODE_VERSION=20.11.1
 ARG TARGETARCH  # amd64 and  arm64

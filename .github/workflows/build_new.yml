@@ -1,11 +1,13 @@
 name: Build and Push Docker Images to Both Registries
 
 on:
-  push:
-    paths:
-      - '**/Dockerfile*'
-      - '**/*.py'
-      - '**/*.sh'
+  #push:
+  #  paths:
+  #    - '**/Dockerfile*'
+  #    - '**/*.py'
+  #    - '**/*.sh'
+  workflow_dispatch:
+  
 env:
   DOCKER_NAMESPACE: ${{ secrets.DOCKER_NAMESPACE }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
