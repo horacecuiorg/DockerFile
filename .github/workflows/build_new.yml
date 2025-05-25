@@ -66,8 +66,8 @@ jobs:
                 --file "$file" \
                 --platform linux/amd64,linux/arm64 \
                 --push \
-                --cache-from type=gha \
-                --cache-to type=gha,mode=max \
+                --cache-from type=gha,scope=$service \
+                --cache-to type=gha,mode=max,scope=$service \
                 -t "$image" "$dir"
 
               IMAGES_PUSHED+=("$image")
@@ -79,7 +79,7 @@ jobs:
           for img in "${IMAGES_PUSHED[@]}"; do
             echo " - $img"
           done
-          
+
           echo "${IMAGES_PUSHED[@]}" > images_pushed.txt
           echo "images_pushed=${IMAGES_PUSHED[*]}" >> $GITHUB_OUTPUT
 
