@@ -59,7 +59,7 @@ jobs:
 
       - name: Build Docker images (without pushing)
         if: steps.changes.outputs.services != ''
-        id: buildonly
+        id: build_and_push
         run: |
           # 将 services 字符串转换成数组
           IFS=' ' read -r -a services_array <<< "${{ steps.changes.outputs.services }}"
