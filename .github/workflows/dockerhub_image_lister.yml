@@ -1,0 +1,42 @@
+name: List Docker Hub Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      namespace:
+        description: 'Docker Hub 用户名或组织名 (Namespace)'
+        required: true
+        default: 'library' # 默认使用官方库 (e.g., library/ubuntu)
+      use_auth:
+        description: '是否使用 Docker Hub 凭据登录 (用于私有仓库或避免速率限制)?'
+        type: boolean
+        required: true
+        default: false
+
+jobs:
+  list_images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # 只需要读取仓库内容，不是必须的，但建议保留
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: pip install requests
+
+      - name: Run Docker Hub Image Lister Script
+        env:
+          TARGET_NAMESPACE: ${{ inputs.namespace }}
+          USE_DOCKER_HUB_AUTH: ${{ inputs.use_auth }}
+          # 仅当 use_auth 为 true 时，才将敏感信息传递给脚本
+          DOCKER_HUB_USERNAME: ${{ inputs.use_auth == true && secrets.DOCKER_HUB_USERNAME || '' }}
+          DOCKER_HUB_PASSWORD: ${{ inputs.use_auth == true && secrets.DOCKER_HUB_PASSWORD || '' }}
+        run: |
+          python public_scripts/list_dockerhub_images.py
