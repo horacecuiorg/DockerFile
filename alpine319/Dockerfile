@@ -3,7 +3,7 @@ FROM alpine:3.19
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH=/usr/local/bin:$PATH
 ARG NODE_VERSION=23.11.1
-ARG TARGETARCH  # amd64 or arm64
+ARG TARGETARCH  # amd64 or arm64 
 
 # 安装必要软件
 RUN apk update && apk add --no-cache \

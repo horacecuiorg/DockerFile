@@ -68,6 +68,7 @@ jobs:
                 --push \
                 --cache-from type=gha,scope=$service \
                 --cache-to type=gha,mode=max,scope=$service \
+                --progress=plain \
                 -t "$image" "$dir"
 
               IMAGES_PUSHED+=("$image")
