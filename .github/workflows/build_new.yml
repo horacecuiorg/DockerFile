@@ -94,7 +94,7 @@ jobs:
         id: push_docker_hub
         run: |
           IMAGES_PUSHED=()
-          for dir in ${{ fromJson(steps.changes.outputs.services) }}; do
+          for dir in ${{ steps.changes.outputs.services }}; do
             for file in "$dir"/Dockerfile*; do
               [ -f "$file" ] || continue
               base=$(basename "$file")
@@ -118,7 +118,7 @@ jobs:
         id: push_ghcr
         run: |
           IMAGES_PUSHED=()
-          for dir in ${{ fromJson(steps.changes.outputs.services) }}; do
+          for dir in ${{ steps.changes.outputs.services }}; do
             for file in "$dir"/Dockerfile*; do
               [ -f "$file" ] || continue
               base=$(basename "$file")
