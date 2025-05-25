@@ -1,1 +1,1 @@
-FROM ubuntu22.04
+FROM cyhfch/ubuntu2204
