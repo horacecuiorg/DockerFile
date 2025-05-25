@@ -77,7 +77,6 @@ jobs:
               fi
 
               echo "📦 Building $service:$tag from $file..."
-
               docker buildx build \
                 --file "$file" \
                 --platform linux/amd64,linux/arm64 \
@@ -85,7 +84,7 @@ jobs:
                 --cache-to type=gha,mode=max,scope=$service \
                 --progress=plain \
                 -t "${{ secrets.DOCKER_NAMESPACE }}/$service:$tag" \
-                -t "ghcr.io/${{ env.GHCR_ORG_NAMESPACE }}/$service:$tag" \ # **关键更改**：构建时使用 env.GHCR_ORG_NAMESPACE
+                -t "ghcr.io/${{ env.GHCR_ORG_NAMESPACE }}/$service:$tag" \ 
                 "$dir"
             done
           done
@@ -130,7 +129,7 @@ jobs:
               else
                 tag="${base#Dockerfile_}"
               fi
-              image="ghcr.io/${{ env.GHCR_ORG_NAMESPACE }}/$service:$tag" # **关键更改**：推送时使用 env.GHCR_ORG_NAMESPACE
+              image="ghcr.io/${{ env.GHCR_ORG_NAMESPACE }}/$service:$tag" 
               echo "⬆️ Pushing $image to GHCR..."
               docker push "$image"
               IMAGES_PUSHED+=("$image")
