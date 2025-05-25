@@ -1,1 +1,1 @@
-FROM cyhfch/ubuntu2204
+FROM hello-world

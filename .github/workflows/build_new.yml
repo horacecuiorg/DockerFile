@@ -98,7 +98,7 @@ jobs:
 
       - name: Show pushed images summary
         # 显示所有成功推送的镜像
-        if: steps.buildonly.outcome == 'success'
+        if: steps.build_and_push.outcome == 'success'
         run: |
           echo "--- 推送镜像列表 ---"
           echo "${{ steps.build_and_push.outputs.all_pushed_images }}" | tr ' ' '\n'
