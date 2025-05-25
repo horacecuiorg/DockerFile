@@ -39,9 +39,7 @@ jobs:
           username: ${{ secrets.GHCR_NAMESPACE }} # **登录用户名**：使用 Secret
           password: ${{ secrets.GHCR_PAT }} # 使用 GHCR PAT Secret
         env:
-          HAS_GHCR_CREDENTIALS: ${{ secrets.GHCR_NAMESPACE && secrets.GHCR_PAT  && 'true' || 'false' }}
-          #HAS_GHCR_CREDENTIALS: ${{ secrets.GHCR_NAMESPACE && secrets.GHCR_PAT && env.GHCR_ORG_NAMESPACE && 'true' || 'false' }}
-
+          HAS_GHCR_CREDENTIALS: ${{ secrets.GHCR_NAMESPACE && secrets.GHCR_PAT && vars.GHCR_ORG_NAMESPACE && 'true' || 'false' }} 
 
       - name: Detect changed services
         id: changes
@@ -79,7 +77,6 @@ jobs:
               fi
 
               echo "📦 Building $service:$tag from $file..."
-              echo ${{ env.GHCR_ORG_NAMESPACE }}
               docker buildx build \
                 --file "$file" \
                 --platform linux/amd64,linux/arm64 \
