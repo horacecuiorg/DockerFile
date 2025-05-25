@@ -1,93 +1,152 @@
-name: build
+name: Build and Push Docker Images to Both Registries
 
-on:
-  push:
-    paths:
-      - '**/Dockerfile*'
-      - '**/*.py'
-      - '**/*.sh'
+ on:
+   push:
+     paths:
+       - '**/Dockerfile*'
+       - '**/*.py'
+       - '**/*.sh'
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+ jobs:
+   build:
+     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+     steps:
+       - name: Checkout code
+         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+       - name: Set up Docker Buildx
+         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_NAMESPACE }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+       - name: Log in to Docker Hub
+         if: ${{ secrets.DOCKER_NAMESPACE != '' && secrets.DOCKER_PASSWORD != '' }}
+         uses: docker/login-action@v3
+         with:
+           registry: docker.io
+           username: ${{ secrets.DOCKER_NAMESPACE }}
+           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Detect changed services
-        id: changes
-        run: |
-          git fetch origin ${{ github.event.before }}
-          CHANGED_DIRS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | \
-            awk -F/ '{print $1}' | sort -u)
+       - name: Log in to GHCR
+         if: ${{ secrets.GHCR_NAMESPACE != '' && secrets.GHCR_PAT != '' }}
+         uses: docker/login-action@v3
+         with:
+           registry: ghcr.io
+           username: ${{ secrets.GHCR_NAMESPACE }} # **登录用户名**：使用 Secret
+           password: ${{ secrets.GHCR_PAT }} # 使用 GHCR PAT Secret
 
-          SERVICES=""
-          for dir in $CHANGED_DIRS; do
-            if ls "$dir"/Dockerfile* 1> /dev/null 2>&1; then
-              SERVICES="$SERVICES $dir"
-            fi
-          done
+       - name: Detect changed services
+         id: changes
+         run: |
+           git fetch origin ${{ github.event.before }}
+           CHANGED_DIRS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | \
+             awk -F/ '{print $1}' | sort -u)
 
-          echo "services=$SERVICES" >> $GITHUB_OUTPUT
+           SERVICES=""
+           for dir in $CHANGED_DIRS; do
+             if ls "$dir"/Dockerfile* 1> /dev/null 2>&1; then
+               SERVICES="$SERVICES $dir"
+             fi
+           done
 
-      - name: Build and push Docker images
-        if: steps.changes.outputs.services != ''
-        id: buildpush
-        run: |
-          IMAGES_PUSHED=()
+           echo "services=$SERVICES" >> "$GITHUB_OUTPUT"
 
-          for dir in ${{ steps.changes.outputs.services }}; do
-            for file in "$dir"/Dockerfile*; do
-              [ -f "$file" ] || continue
-              base=$(basename "$file")
-              service=$(basename "$dir")
+       - name: Build Docker images (without pushing)
+         # 仅构建，不立即推送
+         if: steps.changes.outputs.services != ''
+         id: buildonly
+         run: |
+           for dir in ${{ fromJson(steps.changes.outputs.services) }}; do
+             for file in "$dir"/Dockerfile*; do
+               [ -f "$file" ] || continue
+               base=$(basename "$file")
+               service=$(basename "$dir")
 
-              if [[ "$base" == "Dockerfile" ]]; then
-                tag="latest"
-              else
-                tag="${base#Dockerfile_}"
-              fi
+               if [[ "$base" == "Dockerfile" ]]; then
+                 tag="latest"
+               else
+                 tag="${base#Dockerfile_}"
+               fi
 
-              image="${{ secrets.DOCKER_NAMESPACE }}/$service:$tag"
+               echo "📦 Building $service:$tag from $file..."
 
-              echo "📦 Building and pushing $image from $file..."
+               docker buildx build \
+                 --file "$file" \
+                 --platform linux/amd64,linux/arm64 \
+                 --cache-from type=gha,scope=$service \
+                 --cache-to type=gha,mode=max,scope=$service \
+                 --progress=plain \
+                 -t "${{ secrets.DOCKER_NAMESPACE }}/$service:$tag" \
+                 -t "ghcr.io/${{ env.GHCR_ORG_NAMESPACE }}/$service:$tag" \ # **关键更改**：构建时使用 env.GHCR_ORG_NAMESPACE
+                 "$dir"
+             done
+           done
 
-              docker buildx build \
-                --file "$file" \
-                --platform linux/amd64,linux/arm64 \
-                --push \
-                --cache-from type=gha,scope=$service \
-                --cache-to type=gha,mode=max,scope=$service \
-                --progress=plain \
-                -t "$image" "$dir"
+       - name: Push Docker images to Docker Hub
+         # 仅当 Docker Hub 凭据存在且有服务被构建时才执行
+         if: ${{ secrets.DOCKER_NAMESPACE != '' && secrets.DOCKER_PASSWORD != '' && steps.changes.outputs.services != '' }}
+         id: push_docker_hub
+         run: |
+           IMAGES_PUSHED=()
+           for dir in ${{ fromJson(steps.changes.outputs.services) }}; do
+             for file in "$dir"/Dockerfile*; do
+               [ -f "$file" ] || continue
+               base=$(basename "$file")
+               service=$(basename "$dir")
 
-              IMAGES_PUSHED+=("$image")
-            done
-          done
+               if [[ "$base" == "Dockerfile" ]]; then
+                 tag="latest"
+               else
+                 tag="${base#Dockerfile_}"
+               fi
+               image="${{ secrets.DOCKER_NAMESPACE }}/$service:$tag"
+               echo "⬆️ Pushing $image to Docker Hub..."
+               docker push "$image"
+               IMAGES_PUSHED+=("$image")
+             done
+           done
+           echo "docker_hub_images=${IMAGES_PUSHED[*]}" >> "$GITHUB_OUTPUT"
 
-          echo ""
-          echo "✅ Build complete. Images pushed:"
-          for img in "${IMAGES_PUSHED[@]}"; do
-            echo " - $img"
-          done
+       - name: Push Docker images to GHCR
+         # 仅当 GHCR 凭据存在且有服务被构建时才执行
+         if: ${{ env.GHCR_ORG_NAMESPACE != '' && secrets.GHCR_PAT != '' && secrets.GHCR_NAMESPACE != '' && steps.changes.outputs.services != '' }} # 增加对 secrets.GHCR_NAMESPACE 的检查
+         id: push_ghcr
+         run: |
+           IMAGES_PUSHED=()
+           for dir in ${{ fromJson(steps.changes.outputs.services) }}; do
+             for file in "$dir"/Dockerfile*; do
+               [ -f "$file" ] || continue
+               base=$(basename "$file")
+               service=$(basename "$dir")
 
-          echo "${IMAGES_PUSHED[@]}" > images_pushed.txt
-          echo "images_pushed=${IMAGES_PUSHED[*]}" >> $GITHUB_OUTPUT
+               if [[ "$base" == "Dockerfile" ]]; then
+                 tag="latest"
+               else
+                 tag="${base#Dockerfile_}"
+               fi
+               image="ghcr.io/${{ env.GHCR_ORG_NAMESPACE }}/$service:$tag" # **关键更改**：推送时使用 env.GHCR_ORG_NAMESPACE
+               echo "⬆️ Pushing $image to GHCR..."
+               docker push "$image"
+               IMAGES_PUSHED+=("$image")
+             done
+           done
+           echo "ghcr_images=${IMAGES_PUSHED[*]}" >> "$GITHUB_OUTPUT"
 
-      - name: Show pushed images
-        if: steps.buildpush.outcome == 'success'
-        run: |
-          echo "✅ Docker images pushed:"
-          cat images_pushed.txt | tr ' ' '\n' | while read line; do
-            echo " - $line"
-          done
+       - name: Show pushed images summary
+         # 显示所有成功推送的镜像
+         if: steps.buildonly.outcome == 'success'
+         run: |
+           echo "--- 推送结果总结 ---"
+           if [[ -n "${{ steps.push_docker_hub.outputs.docker_hub_images }}" ]]; then
+             echo "✅ 已推送到 Docker Hub:"
+             echo "${{ steps.push_docker_hub.outputs.docker_hub_images }}" | tr ' ' '\n'
+           else
+             echo "❌ 未推送到 Docker Hub (可能未配置或无变化)"
+           fi
+           echo ""
+           if [[ -n "${{ steps.push_ghcr.outputs.ghcr_images }}" ]]; then
+             echo "✅ 已推送到 GHCR:"
+             echo "${{ steps.push_ghcr.outputs.ghcr_images }}" | tr ' ' '\n'
+           else
+             echo "❌ 未推送到 GHCR (可能未配置或无变化)"
+           fi
+           echo "--------------------"
