@@ -67,7 +67,7 @@ jobs:
           rm -f images.txt
           for dir in "${services_array[@]}"; do
             echo "👉 Building $dir"
-            bash public_scripts/build_one.sh "$dir"
+            bash public_scripts/build_one_Dockerfile.sh "$dir"
           done
         env:
           DOCKER_NAMESPACE: ${{ env.DOCKER_NAMESPACE }}

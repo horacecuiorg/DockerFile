@@ -47,7 +47,7 @@ jobs:
       - name: Run build script for one service
         run: |
           rm -f images.txt
-          bash public_scripts/build_one.sh "${{ inputs.service }}"
+          bash public_scripts/build_one_Dockerfile.sh "${{ inputs.service }}"
         env:
           DOCKER_NAMESPACE: ${{ env.DOCKER_NAMESPACE }}
           GHCR_ORG_NAMESPACE: ${{ env.GHCR_ORG_NAMESPACE }}
