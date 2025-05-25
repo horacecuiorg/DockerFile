@@ -48,20 +48,20 @@ RUN ARCH=$TARGETARCH && \
 RUN apt-get update && apt-get upgrade -y 
 
 
-# 创建一个新用户 ubuntu，并赋予 sudo 权限
-RUN useradd -m -s /bin/bash ubuntu && \
-    echo "ubuntu:ubuntu" | chpasswd && \
-    adduser ubuntu sudo
+# 创建一个新用户 runner，并赋予 sudo 权限
+RUN useradd -m -s /bin/bash runner && \
+    echo "runner:runner" | chpasswd && \
+    adduser runner sudo
 
-# 允许 ubuntu 用户在使用 sudo 时不需要密码
-RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ubuntu && \
-    chmod 440 /etc/sudoers.d/ubuntu
+# 允许 runner 用户在使用 sudo 时不需要密码
+RUN echo "runner ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/runner && \
+    chmod 440 /etc/sudoers.d/runner
 
 # 设置工作目录为用户主目录
-WORKDIR /home/ubuntu
+WORKDIR /home/runner
 
-# 设置 ubuntu 用户为默认用户
-USER ubuntu
+# 设置 runner 用户为默认用户
+USER runner
 # 默认进入 shell
 CMD ["/bin/bash"]
 
