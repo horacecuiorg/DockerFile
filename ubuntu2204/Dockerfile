@@ -48,8 +48,9 @@ RUN ARCH=$TARGETARCH && \
 RUN apt-get update && apt-get upgrade -y 
 
 
-# 创建一个新用户 runner，并赋予 sudo 权限
-RUN useradd -m -s /bin/bash runner && \
+# --- 直接创建 runner 用户 (UID 1001) ---
+RUN groupadd -g 1001 runner && \
+    useradd -u 1001 -g 1001 -m -s /bin/bash runner && \
     echo "runner:runner" | chpasswd && \
     adduser runner sudo
 

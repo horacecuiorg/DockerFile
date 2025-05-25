@@ -1,6 +1,8 @@
 #!/bin/bash
 set -eo pipefail # 遇到错误立即退出，管道失败也退出
 
+exit 0
+
 # 默认的用户名和组名，如果未通过环境变量提供
 DEFAULT_CUSTOM_USER_NAME="github_actions_user"
 DEFAULT_CUSTOM_GROUP_NAME="github_actions_group" # 默认组名通常与用户名相同
