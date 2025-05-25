@@ -93,6 +93,7 @@ jobs:
               IMAGES_PUSHED+=("$image_ghcr")
             done
           done
+          echo "all_pushed_images=${IMAGES_PUSHED[*]}" >> "$GITHUB_OUTPUT"
 
 
       - name: Show pushed images summary
