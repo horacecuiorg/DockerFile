@@ -38,7 +38,9 @@ RUN case "$TARGETARCH" in \
 RUN groupadd -g 1001 runner && \
     useradd -u 1001 -g 1001 -m -s /bin/bash runner && \
     echo "runner:runner" | chpasswd && \
-    adduser runner sudo
+    adduser runner sudo && \
+    # 如果 docker 组存在，将 runner 用户加入 docker 组
+    if getent group docker >/dev/null; then usermod -aG docker runner; fi
 
 # 允许 runner 用户在使用 sudo 时不需要密码
 RUN echo "runner ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/runner && \
