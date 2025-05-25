@@ -49,7 +49,7 @@ jobs:
       - name: Verify and use JSON output (Example)
         run: |
           echo "JSON file path: ${{ steps.run_script.outputs.docker_hub_results_path }}"
-          echo "JSON string (if small enough): ${{ steps.run_script.outputs.docker_hub_results_json_string }}"
+          # echo "JSON string (if small enough): ${{ steps.run_script.outputs.docker_hub_results_json_string }}"
           
           # 从文件中读取JSON数据
           if [ -f "${{ steps.run_script.outputs.docker_hub_results_path }}" ]; then
