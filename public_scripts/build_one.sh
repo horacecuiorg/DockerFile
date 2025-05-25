@@ -4,6 +4,8 @@ set -e
 dir="$1"
 platforms="${2:-linux/amd64,linux/arm64}"
 
+echo "👉 Building $dir" | tee -a images.txt
+
 for file in "$dir"/Dockerfile*; do
   [ -f "$file" ] || continue
   base=$(basename "$file")
@@ -30,6 +32,6 @@ for file in "$dir"/Dockerfile*; do
     -t "$image_ghcr" \
     "$dir"
 
-  echo "$image_dockerhub" >> images.txt
-  echo "$image_ghcr" >> images.txt
+  echo "📦 Building image: $image_dockerhub" | tee -a images.txt
+  echo "📦 Building image: $image_ghcr" | tee -a images.txt
 done
