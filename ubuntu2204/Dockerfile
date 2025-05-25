@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ghcr.io/horacecuiorg/dockerfile/ubuntu2204:basesoft
 
 LABEL org.opencontainers.image.source https://github.com/horacecuiorg/dockerfile
 
@@ -6,22 +6,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG NODE_VERSION=20.11.1
 ARG TARGETARCH  # amd64 and  arm64
 
-# 安装必要软件
-RUN apt-get update && \
-    apt-get install -y \
-    ca-certificates \
-    curl \
-    wget \
-    vim \
-    nano \
-    git \
-    openssh-client \
-    sudo \
-    iputils-ping \
-    xz-utils \
-    bash && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+
+
+
 # cloudflared
 RUN case "$TARGETARCH" in \
       amd64) ARCH="amd64" ;; \
@@ -34,18 +21,17 @@ RUN case "$TARGETARCH" in \
     cloudflared --version
 
 # node
-RUN ARCH=$TARGETARCH && \
-    case "$ARCH" in \
-      amd64) ARCH_NAME="x64" ;; \
-      arm64) ARCH_NAME="arm64" ;; \
-      *) echo "Unsupported arch: $ARCH" && exit 1 ;; \
-    esac && \
-    curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH_NAME}.tar.xz \
-    | tar -xJ -C /usr/local --strip-components=1 && \
-    node -v && npm -v
+#RUN ARCH=$TARGETARCH && \
+#    case "$ARCH" in \
+#      amd64) ARCH_NAME="x64" ;; \
+#      arm64) ARCH_NAME="arm64" ;; \
+#      *) echo "Unsupported arch: $ARCH" && exit 1 ;; \
+#    esac && \
+#    curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH_NAME}.tar.xz \
+#    | tar -xJ -C /usr/local --strip-components=1 && \
+#    node -v && npm -v
 
-# 更新
-RUN apt-get update && apt-get upgrade -y 
+
 
 
 # --- 直接创建 runner 用户 (UID 1001) ---
