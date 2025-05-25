@@ -39,7 +39,8 @@ jobs:
           username: ${{ secrets.GHCR_NAMESPACE }} # **登录用户名**：使用 Secret
           password: ${{ secrets.GHCR_PAT }} # 使用 GHCR PAT Secret
         env:
-          HAS_GHCR_CREDENTIALS: ${{ secrets.GHCR_NAMESPACE && secrets.GHCR_PAT && env.GHCR_ORG_NAMESPACE && 'true' || 'false' }}
+          HAS_GHCR_CREDENTIALS: ${{ secrets.GHCR_NAMESPACE && secrets.GHCR_PAT  && 'true' || 'false' }}
+          #HAS_GHCR_CREDENTIALS: ${{ secrets.GHCR_NAMESPACE && secrets.GHCR_PAT && env.GHCR_ORG_NAMESPACE && 'true' || 'false' }}
 
 
       - name: Detect changed services
@@ -59,11 +60,13 @@ jobs:
           echo "services=$SERVICES" >> "$GITHUB_OUTPUT"
 
       - name: Build Docker images (without pushing)
-        # 仅构建，不立即推送
         if: steps.changes.outputs.services != ''
         id: buildonly
         run: |
-          for dir in ${{ fromJson(steps.changes.outputs.services) }}; do
+          # 将 services 字符串转换成数组
+          IFS=' ' read -r -a services_array <<< "${{ steps.changes.outputs.services }}"
+
+          for dir in "${services_array[@]}"; do
             for file in "$dir"/Dockerfile*; do
               [ -f "$file" ] || continue
               base=$(basename "$file")
@@ -83,7 +86,7 @@ jobs:
                 --cache-to type=gha,mode=max,scope=$service \
                 --progress=plain \
                 -t "${{ secrets.DOCKER_NAMESPACE }}/$service:$tag" \
-                -t "ghcr.io/${{ env.GHCR_ORG_NAMESPACE }}/$service:$tag" \ 
+                -t "ghcr.io/${{ env.GHCR_ORG_NAMESPACE }}/$service:$tag" \
                 "$dir"
             done
           done
