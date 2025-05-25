@@ -31,7 +31,7 @@ RUN case "$TARGETARCH" in \
     chmod +x /usr/local/bin/cloudflared && \
     cloudflared --version
 
-# node    
+# node
 RUN ARCH=$TARGETARCH && \
     case "$ARCH" in \
       amd64) ARCH_NAME="x64" ;; \

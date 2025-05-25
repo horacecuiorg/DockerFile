@@ -11,7 +11,8 @@ env:
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   GHCR_NAMESPACE: ${{ secrets.GHCR_NAMESPACE }}
   GHCR_PAT: ${{ secrets.GHCR_PAT }}
-  GHCR_ORG_NAMESPACE: ${{ vars.GHCR_ORG_NAMESPACE }}
+  # GHCR_ORG_NAMESPACE: ${{ vars.GHCR_ORG_NAMESPACE }}
+  GHCR_ORG_NAMESPACE: ${{ secrets.GHCR_ORG_NAMESPACE }}
 
 jobs:
   build:

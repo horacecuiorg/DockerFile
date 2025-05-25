@@ -20,7 +20,7 @@ RUN apk update && apk add --no-cache \
     ca-certificates \
     shadow
 
-# cloudflared
+# cloudflared 
 RUN case "$TARGETARCH" in \
       amd64) ARCH="amd64" ;; \
       arm64) ARCH="arm64" ;; \
