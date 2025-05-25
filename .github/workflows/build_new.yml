@@ -75,6 +75,8 @@ jobs:
               else
                 tag="${base#Dockerfile_}"
               fi
+              image_dockerhub="${{ secrets.DOCKER_NAMESPACE }}/$service:$tag"
+              image_ghcr="ghcr.io/${{ vars.GHCR_ORG_NAMESPACE }}/$service:$tag"
 
               echo "📦 Building $service:$tag from $file..."
               docker buildx build \
@@ -83,76 +85,20 @@ jobs:
                 --cache-from type=gha,scope=$service \
                 --cache-to type=gha,mode=max,scope=$service \
                 --progress=plain \
-                -t "${{ secrets.DOCKER_NAMESPACE }}/$service:$tag" \
-                -t "ghcr.io/${{ vars.GHCR_ORG_NAMESPACE }}/$service:$tag" \
+                --push \
+                -t "$image_dockerhub" \
+                -t "$image_ghcr" \
                 "$dir"
+              IMAGES_PUSHED+=("$image_dockerhub")
+              IMAGES_PUSHED+=("$image_ghcr")
             done
           done
 
-      - name: Push Docker images to Docker Hub
-        if: steps.login_dockerhub.outcome == 'success' && steps.changes.outputs.services
-        id: push_docker_hub
-        run: |
-          IMAGES_PUSHED=()
-          for dir in ${{ steps.changes.outputs.services }}; do
-            for file in "$dir"/Dockerfile*; do
-              [ -f "$file" ] || continue
-              base=$(basename "$file")
-              service=$(basename "$dir")
-
-              if [[ "$base" == "Dockerfile" ]]; then
-                tag="latest"
-              else
-                tag="${base#Dockerfile_}"
-              fi
-              image="${{ secrets.DOCKER_NAMESPACE }}/$service:$tag"
-              echo "⬆️ Pushing $image to Docker Hub..."
-              docker push "$image"
-              IMAGES_PUSHED+=("$image")
-            done
-          done
-          echo "docker_hub_images=${IMAGES_PUSHED[*]}" >> "$GITHUB_OUTPUT"
-
-      - name: Push Docker images to GHCR
-        if: steps.login_GHCR.outcome == 'success' && steps.changes.outputs.services
-        id: push_ghcr
-        run: |
-          IMAGES_PUSHED=()
-          for dir in ${{ steps.changes.outputs.services }}; do
-            for file in "$dir"/Dockerfile*; do
-              [ -f "$file" ] || continue
-              base=$(basename "$file")
-              service=$(basename "$dir")
-
-              if [[ "$base" == "Dockerfile" ]]; then
-                tag="latest"
-              else
-                tag="${base#Dockerfile_}"
-              fi
-              image="ghcr.io/${{ vars.GHCR_ORG_NAMESPACE }}/$service:$tag" 
-              echo "⬆️ Pushing $image to GHCR..."
-              docker push "$image"
-              IMAGES_PUSHED+=("$image")
-            done
-          done
-          echo "ghcr_images=${IMAGES_PUSHED[*]}" >> "$GITHUB_OUTPUT"
 
       - name: Show pushed images summary
         # 显示所有成功推送的镜像
         if: steps.buildonly.outcome == 'success'
         run: |
-          echo "--- 推送结果总结 ---"
-          if [[ -n "${{ steps.push_docker_hub.outputs.docker_hub_images }}" ]]; then
-            echo "✅ 已推送到 Docker Hub:"
-            echo "${{ steps.push_docker_hub.outputs.docker_hub_images }}" | tr ' ' '\n'
-          else
-            echo "❌ 未推送到 Docker Hub (可能未配置或无变化)"
-          fi
-          echo ""
-          if [[ -n "${{ steps.push_ghcr.outputs.ghcr_images }}" ]]; then
-            echo "✅ 已推送到 GHCR:"
-            echo "${{ steps.push_ghcr.outputs.ghcr_images }}" | tr ' ' '\n'
-          else
-            echo "❌ 未推送到 GHCR (可能未配置或无变化)"
-          fi
+          echo "--- 推送镜像列表 ---"
+          echo "${{ steps.build_and_push.outputs.all_pushed_images }}" | tr ' ' '\n'
           echo "--------------------"
