@@ -42,7 +42,10 @@ jobs:
 
       - name: Build and push Docker images
         if: steps.changes.outputs.services != ''
+        id: buildpush
         run: |
+          IMAGES_PUSHED=()
+
           for dir in ${{ steps.changes.outputs.services }}; do
             for file in "$dir"/Dockerfile*; do
               [ -f "$file" ] || continue
@@ -66,5 +69,24 @@ jobs:
                 --cache-from type=gha \
                 --cache-to type=gha,mode=max \
                 -t "$image" "$dir"
+
+              IMAGES_PUSHED+=("$image")
             done
+          done
+
+          echo ""
+          echo "✅ Build complete. Images pushed:"
+          for img in "${IMAGES_PUSHED[@]}"; do
+            echo " - $img"
+          done
+          
+          echo "${IMAGES_PUSHED[@]}" > images_pushed.txt
+          echo "images_pushed=${IMAGES_PUSHED[*]}" >> $GITHUB_OUTPUT
+
+      - name: Show pushed images
+        if: steps.buildpush.outcome == 'success'
+        run: |
+          echo "✅ Docker images pushed:"
+          cat images_pushed.txt | tr ' ' '\n' | while read line; do
+            echo " - $line"
           done
