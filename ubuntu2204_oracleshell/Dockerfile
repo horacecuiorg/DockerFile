@@ -6,6 +6,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG NODE_VERSION=20.11.1
 ARG TARGETARCH  # amd64 and  arm64
 
+# 安装 sudo 和 openssh-server
+RUN apt-get update && apt-get install -y sudo openssh-server && \
+    mkdir -p /var/run/sshd && \
+    rm -rf /var/lib/apt/lists/*
 
 # cloudflared
 RUN case "$TARGETARCH" in \
