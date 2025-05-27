@@ -60,4 +60,5 @@ USER cuiyinhu
 WORKDIR /home/cuiyinhu
 
 # 默认进入 shell
-CMD ["/bin/bash"]
+#CMD ["/bin/bash"]
+CMD ["/usr/sbin/sshd", "-D"]
