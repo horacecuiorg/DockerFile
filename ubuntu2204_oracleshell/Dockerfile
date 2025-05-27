@@ -4,24 +4,6 @@ LABEL org.opencontainers.image.source https://github.com/horacecuiorg/dockerfile
 
 ENV DEBIAN_FRONTEND=noninteractive
 ARG NODE_VERSION=20.11.1
-ARG TARGETARCH  # amd64 and  arm64
-
-# 安装 sudo 和 openssh-server
-RUN apt-get update && apt-get install -y sudo openssh-server && \
-    mkdir -p /var/run/sshd && \
-    rm -rf /var/lib/apt/lists/*
-
-# cloudflared
-RUN case "$TARGETARCH" in \
-      amd64) ARCH="amd64" ;; \
-      arm64) ARCH="arm64" ;; \
-      *) echo "Unsupported architecture: $TARGETARCH" && exit 1 ;; \
-    esac && \
-    curl -fsSL -o /usr/local/bin/cloudflared \
-      "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${ARCH}" && \
-    chmod +x /usr/local/bin/cloudflared && \
-    cloudflared --version
-
 
 # 添加组和用户：
 # - 创建 group: 1001 和 54322
@@ -51,15 +33,16 @@ RUN chmod 600 /home/cuiyinhu/.ssh/authorized_keys && \
     sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config && \
     sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config && \
     sed -i 's/^#\?PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config && \
+    sed -i 's/^#HostKey/HostKey/' /etc/ssh/sshd_config && \
     ssh-keygen -A
 
 # 默认暴露 22 端口
 EXPOSE 22
-
-# 默认切换到该用户
-USER cuiyinhu
+USER root
+# 默认切换到该用户 取消，由于需要root运行/usr/sbin/sshd
+#USER cuiyinhu  
 WORKDIR /home/cuiyinhu
 
 # 默认进入 shell
-CMD ["/bin/bash"]
-#CMD ["/usr/sbin/sshd", "-D"]
+#CMD ["/bin/bash"]
+CMD ["/usr/sbin/sshd", "-D", "-e"]
