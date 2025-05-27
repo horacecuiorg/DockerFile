@@ -1,5 +1,7 @@
 FROM ubuntu:22.04
 LABEL org.opencontainers.image.source https://github.com/horacecuiorg/dockerfile
+ENV DEBIAN_FRONTEND=noninteractive
+ARG TARGETARCH  # amd64 and  arm64
 
 # 安装必要软件
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -30,7 +32,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
     apt-get install -y nodejs && \
     npm install -g npm && \
     rm -rf /var/lib/apt/lists/*
-    
+
 # cloudflared
 RUN case "$TARGETARCH" in \
       amd64) ARCH="amd64" ;; \
