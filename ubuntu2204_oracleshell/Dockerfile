@@ -50,7 +50,8 @@ RUN chmod 600 /home/cuiyinhu/.ssh/authorized_keys && \
     chown cuiyinhu:cuiyinhu /home/cuiyinhu/.ssh/authorized_keys&& \
     sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config && \
     sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config && \
-    sed -i 's/^#\?PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+    sed -i 's/^#\?PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config && \
+    ssh-keygen -A
 
 # 默认暴露 22 端口
 EXPOSE 22
@@ -60,5 +61,5 @@ USER cuiyinhu
 WORKDIR /home/cuiyinhu
 
 # 默认进入 shell
-#CMD ["/bin/bash"]
-CMD ["/usr/sbin/sshd", "-D"]
+CMD ["/bin/bash"]
+#CMD ["/usr/sbin/sshd", "-D"]
