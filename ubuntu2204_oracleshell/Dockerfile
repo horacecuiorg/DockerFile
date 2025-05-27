@@ -34,7 +34,6 @@ RUN groupadd -g 1001 group1001 && \
     useradd -m -u 1101 -g 1101 -G sudo,1001,54322 -s /bin/bash cuiyinhu && \
     echo 'cuiyinhu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/cuiyinhu && \
     chmod 0440 /etc/sudoers.d/cuiyinhu && \
-    mkdir /var/run/sshd && \
     mkdir -p /home/cuiyinhu/.ssh && \
     chmod 700 /home/cuiyinhu/.ssh && \
     chown cuiyinhu:cuiyinhu /home/cuiyinhu/.ssh
