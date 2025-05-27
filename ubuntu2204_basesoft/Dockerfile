@@ -5,10 +5,10 @@ LABEL org.opencontainers.image.source https://github.com/horacecuiorg/dockerfile
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl wget gnupg lsb-release \
     git unzip zip tar vim nano htop iproute2 iputils-ping net-tools \
-    xz-utils openssh-client \
+    xz-utils openssh-client openssh-server\
     sudo bash \
     build-essential software-properties-common \
-    python3 python3-pip python3-venv && \
+    python3 python3-pip python3-venv && mkdir -p /var/run/sshd && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -30,6 +30,17 @@ RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
     apt-get install -y nodejs && \
     npm install -g npm && \
     rm -rf /var/lib/apt/lists/*
+    
+# cloudflared
+RUN case "$TARGETARCH" in \
+      amd64) ARCH="amd64" ;; \
+      arm64) ARCH="arm64" ;; \
+      *) echo "Unsupported architecture: $TARGETARCH" && exit 1 ;; \
+    esac && \
+    curl -fsSL -o /usr/local/bin/cloudflared \
+      "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${ARCH}" && \
+    chmod +x /usr/local/bin/cloudflared && \
+    cloudflared --version
 
 
 # 默认进入 shell
