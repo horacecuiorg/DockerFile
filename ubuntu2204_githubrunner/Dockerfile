@@ -16,7 +16,7 @@ RUN getent group 118 >/dev/null || ( ! getent group 118 >/dev/null && groupadd -
     chmod 0440 /etc/sudoers.d/runner && \
     mkdir -p /home/runner/.ssh && \
     chmod 700 /home/runner/.ssh && \
-    chown runner:118 /home/cuiyinhu/.ssh
+    chown runner:118 /home/runner/.ssh
 
 USER runner
 WORKDIR /home/runner
