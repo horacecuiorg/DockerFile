@@ -1,31 +1,32 @@
+# 使用官方 Python 3.11 slim 镜像
 FROM python:3.11-slim
 
-# 设置构建时的代理（可选）
-# ARG http_proxy
-# ARG https_proxy
+# 设置非交互式模式，避免 tzdata 等软件包安装时阻塞
+ENV DEBIAN_FRONTEND=noninteractive
 
-# 替换 APT 源为阿里云
-RUN sed -i 's@http://deb.debian.org@http://mirrors.aliyun.com@g' /etc/apt/sources.list && \
-    sed -i 's@http://security.debian.org@http://mirrors.aliyun.com@g' /etc/apt/sources.list && \
+# 设置阿里云 APT 源，并安装必要工具
+RUN echo "deb http://mirrors.aliyun.com/debian bullseye main contrib non-free\n\
+deb http://mirrors.aliyun.com/debian bullseye-updates main contrib non-free\n\
+deb http://mirrors.aliyun.com/debian-security bullseye-security main contrib non-free" \
+    > /etc/apt/sources.list && \
     apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
         build-essential \
         curl \
-        ca-certificates \
         git \
+        ca-certificates \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 配置 pip 使用阿里云源
+# 配置 pip 使用阿里云镜像源
 RUN mkdir -p /root/.pip && \
-    echo "[global]" > /root/.pip/pip.conf && \
-    echo "index-url = https://mirrors.aliyun.com/pypi/simple" >> /root/.pip/pip.conf && \
-    echo "trusted-host = mirrors.aliyun.com" >> /root/.pip/pip.conf
+    echo "[global]\nindex-url = https://mirrors.aliyun.com/pypi/simple/\ntrusted-host = mirrors.aliyun.com" > /root/.pip/pip.conf
 
-# 测试 pip & apt
-RUN pip install --upgrade pip && pip install requests
+# 可选：指定工作目录
+#WORKDIR /app
 
-# 设置时区和默认编码
-ENV TZ=Asia/Shanghai \
-    LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8
+# 可选：复制当前目录代码（如果此 Dockerfile 和代码在同一目录）
+# COPY . .
+
+# 可选：设置容器启动命令（例如运行 FastAPI、Django 等）
+# CMD ["python", "main.py"]
