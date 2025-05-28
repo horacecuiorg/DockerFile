@@ -24,5 +24,13 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# 默认用户参数
+ENV UID=1000 \
+    GID=1000 \
+    USERNAME=dockeruser \
+    GROUPNAME=dockeruser \
+    DOCKER_GID=999
+# 可通过 .env 文件或运行时覆盖
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]
