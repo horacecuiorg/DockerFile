@@ -6,6 +6,7 @@ GROUP_ID=${GID:-1000}
 USERNAME=${USERNAME:-dockeruser}
 GROUPNAME=${GROUPNAME:-$USERNAME}
 DOCKER_GID=${DOCKER_GID:-999}  # 默认 root 所属组 stat -c '%g' /var/run/docker.sock
+SSH_KEY_FILE="/tmp/id_rsa.pub"
 
 # ===== 处理组 =====
 EXISTING_GROUP=$(getent group "$GROUP_ID" | cut -d: -f1)
@@ -60,4 +61,16 @@ if [ ! -f "$SUDO_FILE" ] || ! grep -Fxq "$LINE" "$SUDO_FILE"; then
 fi
 
 # ===== 切换用户执行 =====
-exec sudo -u "$USERNAME" "$@"
+# exec sudo -u "$USERNAME" "$@"
+
+# 设置 SSH 公钥
+if [ -f "$SSH_KEY_FILE" ]; then
+    SSH_HOME="/home/$USERNAME/.ssh"
+    mkdir -p "$SSH_HOME"
+    cat "$SSH_KEY_FILE" > "$SSH_HOME/authorized_keys"
+    chmod 600 "$SSH_HOME/authorized_keys"
+    chmod 700 "$SSH_HOME"
+    chown -R "$USERNAME:$GROUPNAME" "$SSH_HOME"
+fi
+
+exec "$@"
