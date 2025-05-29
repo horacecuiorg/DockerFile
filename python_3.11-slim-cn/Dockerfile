@@ -7,7 +7,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # 去掉deb http://mirrors.aliyun.com/debian-security bullseye-security main contrib non-free" \
 # 设置阿里云 APT 源，并安装必要工具
-RUN echo "deb http://mirrors.aliyun.com/debian bullseye main contrib non-free\n deb http://mirrors.aliyun.com/debian bullseye-updates main contrib non-free" \
+RUN echo "deb http://mirrors.aliyun.com/debian bookworm main contrib non-free\n \
+          deb http://mirrors.aliyun.com/debian bookworm-updates main contrib non-free\n \
+          deb http://mirrors.aliyun.com/debian-security bookworm-security main contrib non-free" \
     > /etc/apt/sources.list && \
     apt-get update && \
     apt-get upgrade -y && \
