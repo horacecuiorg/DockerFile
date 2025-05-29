@@ -7,7 +7,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # 去掉deb http://mirrors.aliyun.com/debian-security bullseye-security main contrib non-free" \
 # 设置阿里云 APT 源，并安装必要工具
-RUN echo "deb http://mirrors.aliyun.com/debian bookworm main contrib non-free\n \
+RUN rm -f /etc/apt/sources.list.d/* && \  # <--- 关键步骤：删除所有额外的源文件
+    echo "deb http://mirrors.aliyun.com/debian bookworm main contrib non-free\n \
           deb http://mirrors.aliyun.com/debian bookworm-updates main contrib non-free\n \
           deb http://mirrors.aliyun.com/debian-security bookworm-security main contrib non-free" \
     > /etc/apt/sources.list && \
