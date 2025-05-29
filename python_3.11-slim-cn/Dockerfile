@@ -4,10 +4,11 @@ FROM python:3.11-slim
 # 设置非交互式模式，避免 tzdata 等软件包安装时阻塞
 ENV DEBIAN_FRONTEND=noninteractive
 
+
+# 去掉deb http://mirrors.aliyun.com/debian-security bullseye-security main contrib non-free" \
 # 设置阿里云 APT 源，并安装必要工具
 RUN echo "deb http://mirrors.aliyun.com/debian bullseye main contrib non-free\n\
 deb http://mirrors.aliyun.com/debian bullseye-updates main contrib non-free\n\
-deb http://mirrors.aliyun.com/debian-security bullseye-security main contrib non-free" \
     > /etc/apt/sources.list && \
     apt-get update && \
     apt-get upgrade -y && \
