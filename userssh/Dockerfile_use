@@ -1,23 +1,14 @@
-FROM ubuntu:22.04
-
-# 安装 ssh 客户端
-RUN apt-get update && apt-get install -y \
-    openssh-client \
-    bash \
-    && rm -rf /var/lib/apt/lists/*
+FROM cyhfch/userssh
 
 
-# 创建普通用户
 ARG USERNAME=user
+ARG GROUPNAME=user
 ARG UID=1000
 ARG GID=1000
-RUN groupadd -g ${GID} ${USERNAME} && \
-    useradd -m -u ${UID} -g ${GID} -s /bin/bash ${USERNAME}
 
-# 创建 .ssh 目录
-RUN mkdir -p /home/${USERNAME}/.ssh && \
-    chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.ssh && \
-    chmod 700 /home/${USERNAME}/.ssh
+COPY scripts/create_user.sh /tmp/create_user.sh
+RUN chmod +x /tmp/create_user.sh && \
+    /tmp/create_user.sh "$USERNAME" "$GROUPNAME" "$UID" "$GID"
 
 # 拷贝默认启动脚本
 COPY entrypoint.sh /entrypoint.sh

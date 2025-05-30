@@ -3,9 +3,9 @@ name: Build and Push Docker Images
 on:
   push:
     paths:
-      - '**/Dockerfile*'
-      - '**/*.py'
-      - '**/*.sh'
+      - '**/Dockerfile'
+      - '**/entrypoint.py'
+      - '**/entrypoint.sh'
   workflow_dispatch:
 
 env:
