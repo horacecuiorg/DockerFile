@@ -22,7 +22,7 @@ RUN apt-get update && \
 
 # 配置 pip 使用阿里云镜像源
 RUN python -m pip install --upgrade pip && \
-    pip install --upgrade flask requests python-dotenv httpx fastapi uvicorn aiosqlite python-multipart gunicorn aiohttp&& \
+    pip install --upgrade flask requests python-dotenv httpx fastapi uvicorn aiosqlite python-multipart gunicorn aiohttp debugpy && \
     mkdir -p /root/.pip && \
     echo "[global]\nindex-url = https://mirrors.aliyun.com/pypi/simple/\ntrusted-host = mirrors.aliyun.com" > /root/.pip/pip.conf
 
