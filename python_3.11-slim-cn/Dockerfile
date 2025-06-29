@@ -22,15 +22,15 @@ RUN apt-get update && \
 
 # 配置 pip 使用阿里云镜像源
 RUN python -m pip install --upgrade pip && \
-    pip install --upgrade flask requests python-dotenv httpx fastapi uvicorn aiosqlite python-multipart gunicorn aiohttp debugpy && \
+    pip install --upgrade flask requests python-dotenv httpx fastapi uvicorn aiosqlite python-multipart gunicorn aiohttp debugpy dingtalk-stream && \
     mkdir -p /root/.pip && \
     echo "[global]\nindex-url = https://mirrors.aliyun.com/pypi/simple/\ntrusted-host = mirrors.aliyun.com" > /root/.pip/pip.conf
 
-# 可选：指定工作目录
-#WORKDIR /app
+COPY ./app /app
 
-# 可选：复制当前目录代码（如果此 Dockerfile 和代码在同一目录）
-# COPY . .
-
+EXPOSE 8000
+EXPOSE 5678
+WORKDIR /app
 # 可选：设置容器启动命令（例如运行 FastAPI、Django 等）
-# CMD ["python", "main.py"]
+CMD ["python", "main.py"]
+# CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
