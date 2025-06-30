@@ -12,7 +12,7 @@ RUN apt-get update && \
         build-essential \
         curl \
         git \
-        ca-certificates \
+        ca-certificates iputils-ping iproute2 dnsutils \
     && apt-get clean && rm -rf /var/lib/apt/lists/* && \
     rm -f /etc/apt/sources.list.d/* && \
     echo "deb http://mirrors.aliyun.com/debian bookworm main contrib non-free\n\
