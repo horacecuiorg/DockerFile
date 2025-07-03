@@ -10,8 +10,8 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
         build-essential \
-        curl \
-        git \
+        curl wget traceroute telnet tcpdump \
+        git netcat nmap \
         ca-certificates iputils-ping iproute2 dnsutils \
     && apt-get clean && rm -rf /var/lib/apt/lists/* && \
     rm -f /etc/apt/sources.list.d/* && \
