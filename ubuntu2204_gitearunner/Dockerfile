@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+RUN curl -L https://github.com/getsops/sops/releases/download/v3.10.2/sops-v3.10.2.linux.${TARGETARCH} -o sops \
+    && chmod +x sops && mv sops /usr/local/bin/
 
 # --- 直接创建 ubuntu 用户 (UID 1000) ---
 RUN groupadd -g 1000 ubuntu && \
