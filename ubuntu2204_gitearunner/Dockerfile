@@ -7,7 +7,7 @@ ARG TARGETARCH  # amd64 and  arm64
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl wget gnupg lsb-release \
     git unzip zip tar vim nano htop iproute2 iputils-ping net-tools \
-    xz-utils openssh-client openssh-server\
+    xz-utils openssh-client \
     sudo bash tmux\
     build-essential software-properties-common \
     python3 python3-pip python3-venv && mkdir -p /var/run/sshd && \
