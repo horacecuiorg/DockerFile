@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # --- 直接创建 ubuntu 用户 (UID 1000) ---
 RUN groupadd -g 1000 ubuntu && \
-    useradd -u 1000 -g 1001 -m -s /bin/bash ubuntu && \
+    useradd -u 1000 -g 1000 -m -s /bin/bash ubuntu && \
     echo "ubuntu:ubuntu" | chpasswd && \
     adduser ubuntu sudo && \
     # 如果 docker 组存在，将 ubuntu 用户加入 docker 组
